@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Høst Tåke Studiohule</title>
+  <link href="https://fonts.googleapis.com/css2?family=Uncial+Antiqua&family=Crimson+Pro&display=swap" rel="stylesheet"/>
+  <style>
+    /*—— Base Cave Background ——*/
+    body {
+      margin: 0;
+      font-family: 'Crimson Pro', serif;
+      color: #f4f4f4;
+      background: url('images/background-center.png') center/cover fixed no-repeat;
+      overflow-x: hidden;
+    }
+
+    /*—— Fog Overlay ——*/
+    #intro {
+      position: fixed; top:0; left:0; width:100%; height:100%;
+      pointer-events: none; z-index:9999;
+    }
+    #intro img {
+      position: absolute; top:0; left:0;
+      width:200%; height:100%; object-fit:cover;
+      animation-fill-mode: forwards;
+    }
+    .fog-left {
+      animation: slideLeft 5s ease-out forwards;
+    }
+    @keyframes slideLeft {
+      0%   { transform: translateX(-20%); opacity:1; }
+      80%  { opacity:1; }
+      100% { transform: translateX(-120%); opacity:0; }
+    }
+    .fog-right {
+      transform: scaleX(-1) translateX(20%);
+      animation: slideRight 5s ease-out forwards;
+    }
+    @keyframes slideRight {
+      0%   { transform: scaleX(-1) translateX(20%); opacity:1; }
+      80%  { opacity:1; }
+      100% { transform: scaleX(-1) translateX(120%); opacity:0; }
+    }
+
+    /*—— Hide UI until reveal ——*/
+    .main-ui {
+      visibility: hidden;
+      opacity: 0;
+      transition: opacity 1s ease-in;
+    }
+    body.show-main .main-ui {
+      visibility: visible;
+      opacity: 1;
+    }
+
+    /*—— Header & Logo & Radial Menu ——*/
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(0,0,0,0.7);
+      padding: 10px 20px;
+      position: relative;
+      z-index: 2;
+    }
+    .logo-container {
+      position: relative;
+      width: 180px;
+      height: 80px;
+    }
+    .logo-container img.logo {
+      width: 100%; height: auto;
+    }
+    .logo-container .radial-menu {
+      position: absolute; top:50%; left:50%;
+      width: 220px; height: 220px;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+    }
+    .radial-menu .item {
+      --angle: 0deg; --dist: 90px;
+      position: absolute; left:50%; top:50%;
+      width: 50px; height: 50px; margin: -25px 0 0 -25px;
+      background: rgba(18,18,18,0.85);
+      border: 2px solid #e2c266; border-radius:8px;
+      display: flex; flex-direction: column; align-items: center;
+      justify-content: center; font-size:1.5rem; color:#f4f4f4;
+      transform:
+        rotate(var(--angle))
+        translate(var(--dist))
+        rotate(calc(-1*var(--angle)));
+    }
+    .radial-menu .item span.label {
+      font-size:.7rem; color:#ddd; margin-top:4px;
+    }
+    .radial-menu .item:nth-child(1){--angle:-90deg;}
+    .radial-menu .item:nth-child(2){--angle:-60deg;}
+    .radial-menu .item:nth-child(3){--angle:-30deg;}
+    .radial-menu .item:nth-child(4){--angle:0deg;}
+    .radial-menu .item:nth-child(5){--angle:30deg;}
+    .radial-menu .item:nth-child(6){--angle:60deg;}
+    .radial-menu .item:nth-child(7){--angle:90deg;}
+
+    /*—— Socials “drop in” ——*/
+    .socials {
+      display: flex; gap:16px;
+      animation: dropDown 1s ease-out forwards;
+      opacity: 0;
+    }
+    .socials a {
+      color: #f4f4f4; text-decoration: none;
+      font-size: 1.3rem; display: flex; flex-direction: column;
+      align-items: center; transition: color .3s;
+    }
+    .socials a .label {
+      font-size:.65rem; color:#ddd; margin-top:4px;
+    }
+    .socials a:hover { color:#e2c266; }
+    @keyframes dropDown {
+      0%   { transform: translateY(-100%); opacity:0; }
+      60%  { transform: translateY(10%); opacity:1; }
+      100% { transform: translateY(0); opacity:1; }
+    }
+
+    /*—— Top Icons ——*/
+    .top-icons {
+      display: flex; justify-content: center; gap:30px;
+      margin: 10px 0 0; z-index:1;
+    }
+    .top-icons a {
+      color:#f4f4f4; text-decoration:none;
+      font-size:1.8rem; display:flex; flex-direction:column;
+      align-items:center; width:60px; transition:transform .2s;
+    }
+    .top-icons a:hover { transform: translateY(-6px); }
+    .top-icons .label { font-size:.75rem; color:#ddd; margin-top:4px; }
+
+    /*—— Banner moved up ——*/
+    .banner {
+      text-align: center; padding: 100px 20px 40px; z-index:1;
+    }
+    .banner h2 {
+      font-family:'Uncial Antiqua', cursive; font-size:3rem;
+      color:#fff2d0; text-shadow:2px 2px 6px #000; margin-bottom:10px;
+    }
+    .banner p.subtitle {
+      font-size:1.3rem; max-width:800px; margin:0 auto 40px;
+      text-shadow:1px 1px 4px #000;
+    }
+
+    /*—— Discover + Features & News ——*/
+    .fn-wrapper {
+      display:flex; align-items:flex-start; justify-content:center; gap:30px;
+      max-width:1000px; margin:0 auto 60px; padding:0 20px; z-index:1;
+    }
+    .discover { flex:2; text-align:left; }
+    .discover h3 {
+      font-family:'Uncial Antiqua', cursive; font-size:2rem;
+      color:#f0e1b0; margin-bottom:12px;
+    }
+    .discover p { font-size:1rem; line-height:1.6; margin-bottom:24px; }
+    .features {
+      display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:20px;
+    }
+    .feature {
+      background:rgba(18,18,18,0.7); border:2px solid #e2c266; border-radius:8px;
+      padding:20px; text-align:center; box-shadow:0 0 15px rgba(0,0,0,0.5);
+    }
+    .feature .icon { font-size:2rem; margin-bottom:8px; }
+    .feature .title { font-weight:bold; color:#f0e1b0; margin-bottom:6px; }
+    .feature .desc { font-size:.9rem; line-height:1.3; color:#ddd; }
+
+    .news {
+      flex:1; background:rgba(20,20,20,0.8);
+      border:2px solid #e2c266; border-radius:8px;
+      padding:20px; margin-top:40px;
+      max-height:300px; overflow-y:auto;
+      box-shadow:0 0 15px rgba(0,0,0,0.5);
+    }
+    .news h3 {
+      font-family:'Uncial Antiqua', cursive; font-size:1.2rem;
+      color:#f0e1b0; margin-top:0; margin-bottom:12px;
+    }
+    .news ul { list-style:none; margin:0; padding:0; }
+    .news li { margin-bottom:12px; font-size:.9rem; }
+    .news li time {
+      display:block; font-size:.8rem; color:#aaa; margin-bottom:4px;
+    }
+
+    /*—— Footer ——*/
+    footer {
+      background: rgba(0,0,0,0.6);
+      text-align:center; padding:20px;
+      font-size:.9rem; color:#aaa;
+    }
+    footer a { color:#ccc; text-decoration:none; }
+    footer a:hover { text-decoration:underline; }
+
+    /*—— Responsive ——*/
+    @media (max-width:800px){
+      .logo-container { width:140px; }
+      .logo-container .radial-menu { display:none; }
+      .socials { animation:none; opacity:1; }
+      .top-icons { flex-wrap:wrap; gap:12px; }
+      .fn-wrapper { flex-direction:column; }
+      .news { max-height:none; }
+      .banner h2 { font-size:2.4rem; }
+      .banner p.subtitle { font-size:1rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 1) Fog Overlay -->
+  <div id="intro">
+    <img src="images/ghibli-fog.png" class="fog-left" alt="Fog"/>
+    <img src="images/ghibli-fog.png" class="fog-right" alt="Fog"/>
+  </div>
+
+  <!-- 2) Main UI -->
+  <div class="main-ui">
+
+    <!-- Header -->
+    <header>
+      <div class="logo-container">
+        <img src="images/logo.png" class="logo" alt="Høst Tåke Studiohule Logo"/>
+        <div class="radial-menu">
+          <a href="#" class="item"><span>🎲</span><span class="label">Mini</span></a>
+          <a href="#" class="item"><span>🧙</span><span class="label">RPG</span></a>
+          <a href="#" class="item"><span>🏰</span><span class="label">Worlds</span></a>
+          <a href="#" class="item"><span>📜</span><span class="label">Guides</span></a>
+          <a href="#" class="item"><span>🗺️</span><span class="label">Maps</span></a>
+          <a href="#" class="item"><span>✨</span><span class="label">Magic</span></a>
+          <a href="#" class="item"><span>🎭</span><span class="label">Cosplay</span></a>
+        </div>
+      </div>
+      <div class="socials">
+        <a href="#"><span>📷</span><span class="label">Instagram</span></a>
+        <a href="#"><span>🐦</span><span class="label">X</span></a>
+        <a href="#"><span>📘</span><span class="label">Facebook</span></a>
+        <a href="#"><span>💬</span><span class="label">Discord</span></a>
+      </div>
+    </header>
+
+    <!-- Top Icons -->
+    <div class="top-icons">
+      <a href="#"><span>🎲</span><span class="label">Mini</span></a>
+      <a href="#"><span>🧙</span><span class="label">RPG</span></a>
+      <a href="#"><span>🏰</span><span class="label">Worlds</span></a>
+      <a href="#"><span>📜</span><span class="label">Guides</span></a>
+      <a href="#"><span>🗺️</span><span class="label">Maps</span></a>
+      <a href="#"><span>✨</span><span class="label">Magic</span></a>
+      <a href="#"><span>🎭</span><span class="label">Cosplay</span></a>
+    </div>
+
+    <!-- Hero Banner -->
+    <section class="banner">
+      <h2>Unlock Wonders Hidden in Mist and Moonlight</h2>
+      <p class="subtitle">Rare miniatures, ancient tomes, and guides await those who dare explore.</p>
+    </section>
+
+    <!-- Discover + Features & News -->
+    <div class="fn-wrapper">
+      <div class="discover">
+        <h3>Discover the Artifacts of Etheros</h3>
+        <p>Welcome, brave explorer! Step into our curated collections and find the perfect piece for your next adventure.</p>
+        <div class="features">
+          <div class="feature">
+            <div class="icon">🎲</div>
+            <div class="title">Miniatures & Terrain</div>
+            <div class="desc">3D printable heroes, monsters, terrain.</div>
+          </div>
+          <div class="feature">
+            <div class="icon">🧙</div>
+            <div class="title">RPG Content</div>
+            <div class="desc">Magical items & rolltables.</div>
+          </div>
+          <div class="feature">
+            <div class="icon">🏰</div>
+            <div class="title">Worlds of Adventure</div>
+            <div class="desc">Etheros, Valley of Thorns & Grayspire.</div>
+          </div>
+          <div class="feature">
+            <div class="icon">📜</div>
+            <div class="title">Guides & Tools</div>
+            <div class="desc">Painting tips & worldbuilding.</div>
+          </div>
+          <div class="feature">
+            <div class="icon">🗺️</div>
+            <div class="title">Maps & Assets</div>
+            <div class="desc">Battle maps & tokens.</div>
+          </div>
+          <div class="feature">
+            <div class="icon">✨</div>
+            <div class="title">Misc Magic</div>
+            <div class="desc">Art packs & surprises.</div>
+          </div>
+        </div>
+      </div>
+      <aside class="news">
+        <h3>Latest News</h3>
+        <ul>
+          <li><time>Aug 10, 2025</time>“Frost Drake” miniature now available.</li>
+          <li><time>Aug 3, 2025</time>Painting tips for shadowy creatures.</li>
+          <li><time>Jul 27, 2025</time>New cosplay mask tutorial PDF.</li>
+          <li><time>Jul 15, 2025</time>Etheros v1.2 campaign update.</li>
+        </ul>
+      </aside>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+      <p>© 2025 Høst Tåke Studiohule – Org nr 934 413 741</p>
+      <p>
+        <a href="https://studiohule.no">studiohule.no</a> |
+        <a href="https://studiohule.com">studiohule.com</a> |
+        <a href="terms.html">Terms & Conditions</a>
+      </p>
+    </footer>
+  </div>
+
+  <!-- Reveal Script -->
+  <script>
+    let done = 0;
+    document.querySelectorAll('#intro img').forEach(img => {
+      img.addEventListener('animationend', () => {
+        if (++done === 2) {
+          document.getElementById('intro').remove();
+          document.body.classList.add('show-main');
+        }
+      });
+    });
+  </script>
+</body>
+</html>
